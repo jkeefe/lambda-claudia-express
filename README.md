@@ -9,40 +9,32 @@ Get the npm package manager up and running with what we'll need:
 ```
 npm init --yes
 npm install claudia --save --dev
-npm install express aws-serverless-express --save
+npm install express --save
 ```
+
+## Make the Express app.
+
+Mine's usually called `server.js`. [Here's](./server.js) an example.
 
 ## Creating a Lambda proxy wrapper
 
 We’ll need a Lambda function to host the Express application, and send data between the app and the API Gateway. The `aws-serverless-express` module knows how to translate between API Gateway requests and Express requests and responses, so we’ll use that. Claudia has a convenient command to generate the wrapper function, so you don’t have to write it manually.
 
-Make sure you’re using Claudia 2.1.0 or later, then execute this command line in your project directory (replace `app` with the name of the main Express application module). I'm also adding my existing lambda role. 
+Make sure you’re using Claudia 2.1.0 or later, then execute this command line in your project directory (here `server` is the name of the main Express application module). I'm also adding my existing lambda IAM role, `lambda_basic_execution`. 
 
-`claudia generate-serverless-express-proxy --express-module app`
+`claudia generate-serverless-express-proxy --express-module server --role lambda_basic_execution`
 
-This will add aws-serverless-express to your project dependencies, and create the file containing your Lambda function. By default, the file will be called `lambda.js`. You can change the file name using `--proxy-module-name <module name>`
+This will add `aws-serverless-express` to your project dependencies, and create the file containing your Lambda function. By default, the file will be called `lambda.js`. You can change the file name using `--proxy-module-name <module name>`
 
 ## Deploying to AWS
 
-We can now deploy the Lambda function to AWS, and create the proxy API. With Claudia 2.0, you can create proxy APIs easily – just add the --deploy-proxy-api option while creating the function. For --handler, use the module name that you just generated (so lambda by default) and add .handler.
+We can now deploy the Lambda function to AWS, and create the proxy API. With Claudia 2.0, you can create proxy APIs easily – just add the `--deploy-proxy-api` option while creating the function. For `--handler`, use the module name that you just generated (so `lambda` by default) and add `.handler`.
 
-claudia create --handler lambda.handler --deploy-proxy-api --region us-east-1
+`claudia create --handler lambda.handler --deploy-proxy-api --region us-west-2`
+
 The command will send your app to Lambda and print out a URL where you can access it. That’s pretty much it.
-
-## Running the example
-
-1. run `npm install` to grab the dependencies
-2. run `npm run generate-proxy` to create a simple proxy API for the express app
-3. run `npm run deploy` to send everything up to AWS Lambda
-
-The third step will print out a URL you can use to access the express app.
-
-## Updating the app
-
-1. Change [`app.js`](app.js)
-2. (Optionally) use `npm install <PACKAGE NAME> --save` to install additional dependencies (always save them to `package.json` using `-S` or `--save`)
-3. Run `npm run update` to send the new version up to AWS. No need to generate the proxy again
 
 ## More information and limitations
 
+Be sure to see these important details in the [Running Express Apps in AWS Lambda](https://claudiajs.com/tutorials/serverless-express.html) tutorial.
 
